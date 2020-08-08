@@ -7,7 +7,7 @@
 #include "myls.h"
 // Citation: https://stackoverflow.com/questions/3554120/open-directory-using-c
 bool flags[3] = {false}; // -i, -l, -R
-// test
+// test2
 
 
 int main (int argc, char *argv[]) {
