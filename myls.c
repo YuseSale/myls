@@ -25,8 +25,9 @@ void processArgs(int argc, char *argv[]) {
 
 void parseOption(char* option) {
 	printf("TestText\n");
-	for (int i = 0; i <sizeof(option); i++){
-		printf("%s\n", option[i]);
+	printf("%s\n",option);
+	for (int i = 0; i <strlen(option); i++){
+		printf("%c\n", option[i]);
 	}
 }
 
