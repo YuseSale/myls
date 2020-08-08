@@ -20,7 +20,7 @@ int main (int argc, char *argv[]) {
 
 
 void processArgs(int argc, char *argv[]) {
-	// poop
+	// epileptic seizure
 }
 
 void parseOption(char* option) {
