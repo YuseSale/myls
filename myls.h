@@ -7,6 +7,9 @@ void parseOption(char* option) ;
 
 void printFiles(char* dir);
 
+void testParseOption();
+
+void testFlags();
 #endif
 
 
