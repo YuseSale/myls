@@ -7,7 +7,7 @@
 #include "myls.h"
 // Citation: https://stackoverflow.com/questions/3554120/open-directory-using-c
 bool flags[3] = {false}; // -i, -l, -R
-// test3
+
 
 
 int main (int argc, char *argv[]) {
@@ -17,6 +17,13 @@ int main (int argc, char *argv[]) {
 
 
 void processArgs(int argc, char *argv[]) {
+
+	// Just ./myls
+	if (argc == 1) {
+		printFiles(".");
+		return;
+	}
+
 	for (int i = 1; i < argc; i++) {
 		if (argv[i][0] == '-') {
 			parseOption(argv[i]);
@@ -35,22 +42,30 @@ void parseOption(char* option) {
 }
 
 void printFiles(char* dir) {
-	// struct dirent *pDirent;
-	// DIR *pDir;
+	// Given a directory path, print all files & folders in the directory
 
-	// // Ensure we can open directory.
-    // pDir = opendir (fileList[i]);
-    // if (pDir == NULL) {
-    //     printf ("Cannot open directory '%s'\n", argv[1]);
-    //         return 1;
-    //     }
-	// }
+	struct dirent *pDirent;
+	DIR *pDir;
 
-	// // print file index (iNode number)
-	// printf("%ld ", pDirent->d_ino);
+	// Ensure we can open directory.
+	// If can't, it's a file, so just print it
+	pDir = opendir(dir);
+	if (pDir == NULL) {
+		printf("%s", dir);
+		return;
+	}
 
-	// // Print file name
-	// printf ("%s", pDirent->d_name);
+	// Print all files in the directory
+	// If subdirectories found, recursively print em
+	while((pDirent=readdir(pDir))!=NULL) {
+		printf("%s  ", pDirent->d_name);
+	}
 
-	// closedir (pDir);
+	// print file index (iNode number)
+	//printf("%ld ", pDirent->d_ino);
+
+	// Print file name
+	printf ("%s", pDirent->d_name);
+
+	closedir (pDir);
 }
