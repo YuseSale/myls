@@ -12,6 +12,9 @@ bool flags[3] = {false}; // -i, -l, -R
 
 int main (int argc, char *argv[]) {
 	processArgs(argc, argv);
+
+
+	return 0;
 }
 
 
@@ -60,12 +63,9 @@ void printFiles(char* dir) {
 	while((pDirent=readdir(pDir))!=NULL) {
 		printf("%s  ", pDirent->d_name);
 	}
-
+	printf("\n");
 	// print file index (iNode number)
 	//printf("%ld ", pDirent->d_ino);
-
-	// Print file name
-	printf ("%s", pDirent->d_name);
 
 	closedir (pDir);
 }
