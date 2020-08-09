@@ -105,14 +105,16 @@ void parseOption(char* option) {
 // 	closedir (pDir);
 // }
 
-//readDirectory () 					//given a path to a directory. Put all entities in entityQueue
-									//sort EntityQueue based on entity->d_name in lex.order
-									//iterate through.
-										//if entity is a file, print its name
-										//if directory, print its name, put it into dirQueue
+void readDirectory (char* dir) {
 
-									//iterate through dirQueue by calling readDirectory() on each.
+	stuct dirent entityQueue[10];
+	struct dirent* pDirent;
+	DIR *pDir;
 
-//parseEntity(char* thingName)  		//given an entity's fileName, 
-										//if that entity is a file, print its name
-										//if that entity is a directory, print its name and put it in dirQueue
+
+
+}
+
+void sortEntityQueue(struct dirent* entityQueue) {
+
+}
