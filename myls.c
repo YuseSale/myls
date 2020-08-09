@@ -14,8 +14,8 @@ int main (int argc, char *argv[]) {
 	flags[0],flags[1],flags[2] = false; // -i, -l, -R
 
 
-	testParseOption();
-	testFlags();
+	// testParseOption();
+	// testFlags();
 	
 	processArgs(argc, argv);
 }
