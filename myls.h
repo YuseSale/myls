@@ -12,7 +12,7 @@ void testParseOption();
 void testFlags();
 // void testLexoSort(char** stringQueue);
 void testLexiSort();
-void sortEntityQueue(struct dirent* entityQueue);
+void sortEntityQueue(struct dirent** entityQueue,int numOfEntries);
 void testIsLower();
 bool isLower(char* first, char* second);
 void LexiSort(char table[][MAX_WORD_LENGTH],int numOfEntries);
