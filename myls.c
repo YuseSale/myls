@@ -15,7 +15,7 @@ int main (int argc, char *argv[]) {
 
 
 	// testIsLower();
-	// testLexiSort(); 
+	// testLexiSort();
 	// // testParseOption();
 	// // testFlags();
 
@@ -27,7 +27,7 @@ void testIsLower(){
 	char test1[MAX_WORD_LENGTH] = "";
 	printf("Enter a word: ");
 
-    scanf("%s", test1);  
+    scanf("%s", test1);
 	char test2[MAX_WORD_LENGTH] = "";
 	printf("Enter a word: ");
 
@@ -42,9 +42,9 @@ void testParseOption(){
 	char test[MAX_WORD_LENGTH] = "";
 	printf("Enter a word: ");
 
-    scanf("%s", test);  
+    scanf("%s", test);
 	parseOption(&test[0]);
-	
+
 }
 void testFlags(){
 	printf("-i flag: %d\n",flags[0]);
@@ -54,15 +54,15 @@ void testFlags(){
 
 void processArgs(int argc, char *argv[]) {
 
-	// Just ./myls	
-	if (argc == 1) {	
-		readDirectory(".");	
-		return;	
-	}	
+	// Just ./myls
+	if (argc == 1) {
+		readDirectory(".");
+		return;
+	}
 
 
-	for (int i = 1; i < argc; i++) {	
-		if (argv[i][0] == '-') {	
+	for (int i = 1; i < argc; i++) {
+		if (argv[i][0] == '-') {
 			parseOption(argv[i]);
 		} else {
 			if (flags[2]) {
@@ -82,7 +82,7 @@ void parseOption(char* option) {
 				flags[0] = true;
 				printf("DEBUG: Changed Flag -i to true. \n");
 				break;
-			} 
+			}
 			case 'l':{
 				flags[1] = true;
 				printf("DEBUG :Changed Flag -l to true. \n");
@@ -161,8 +161,11 @@ void readDirectory (char* dir) {
 		//closedir(pDir);
 
 	}
-
-	printf("\n\n");
+	if (entityQueueCount == 0) {
+		printf("\n");
+	} else {
+		printf("\n\n");
+	}
 	if (flags[2]) {
 		for (int i = 0; i < dirQueueCount; i++) {
 			printf("%s: \n", dirQueue[i]);
@@ -194,7 +197,7 @@ void testLexiSort(){
 }
 
 
-void LexiSort(char table[][MAX_WORD_LENGTH],int numOfEntries){	
+void LexiSort(char table[][MAX_WORD_LENGTH],int numOfEntries){
 
 	char lowest[MAX_WORD_LENGTH] = "";
 	int lowestIndex;
@@ -206,7 +209,7 @@ void LexiSort(char table[][MAX_WORD_LENGTH],int numOfEntries){
 
 		for (int j = i; j<numOfEntries; j++){
 			if (isLower(table[j],lowest)){
-				
+
 				strcpy(lowest, table[j]);
 				lowestIndex=j;
 			}
@@ -214,9 +217,9 @@ void LexiSort(char table[][MAX_WORD_LENGTH],int numOfEntries){
 
 
 		strcpy(table[lowestIndex],table[i]);
-		
+
 		strcpy(table[i], lowest);
-		
+
 	}
 
 
@@ -238,12 +241,12 @@ bool isLower(char* first, char* second){
 		else if (i == strlen(first)){
 			return true;
 		}
-		
+
 	}
 
 
-	
-}			
+
+}
 
 
 void sortEntityQueue(struct dirent** entityQueue,int numOfEntries) {
@@ -255,7 +258,7 @@ void sortEntityQueue(struct dirent** entityQueue,int numOfEntries) {
 
 		for (int j = i; j<numOfEntries; j++){
 			if (isLower(entityQueue[j]->d_name ,lowest)){
-				
+
 				strcpy(lowest, entityQueue[j]->d_name );
 				lowestIndex=j;
 			}
@@ -263,15 +266,15 @@ void sortEntityQueue(struct dirent** entityQueue,int numOfEntries) {
 
 		struct dirent* lowestEntity = entityQueue[lowestIndex];
 
-		
+
 		entityQueue[lowestIndex] = entityQueue[i];
 		entityQueue[i] = lowestEntity;
 
 
 		// strcpy(table[lowestIndex],table[i]);
-		
+
 		// strcpy(table[i], lowest);
-		
+
 	}
 
 
