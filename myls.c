@@ -76,8 +76,10 @@ void parseOption(char* option) {
 
 void readDirectory (char* dir) {
 
+
 	int entityQueueMax = 10;
-	struct dirent* entityQueue[entityQueueMax];
+	//struct dirent* entityQueue[entityQueueMax];
+	struct dirent** entityQueue = malloc(entityQueueMax*8);
 	int entityQueueCount = 0;
 	struct dirent* pDirent;
 	DIR *pDir;
@@ -98,6 +100,8 @@ void readDirectory (char* dir) {
 		// Check if entityQueue is full
 		if (entityQueueCount == entityQueueMax) {
 			//TODO: remalloc bigger array
+			entityQueueMax = entityQueueMax * 2;
+			entityQueue = realloc(entityQueue, entityQueueMax*8);
 		}
 
 		entityQueue[entityQueueCount] = pDirent;
@@ -131,13 +135,22 @@ void readDirectory (char* dir) {
 			dirQueueCount++;
 		}
 		closedir(pDir);
+
 	}
+
+	printf("\n\n");
+
 	for (int i = 0; i < dirQueueCount; i++) {
+		printf("%s: \n", dirQueue[i]);
 		readDirectory(dirQueue[i]);
 	}
 
-	//free(entityQueue);
-	//free(dirQueue);
+	// Free all malloced memory
+	free(entityQueue);
+	for (int i = 0; i < dirQueueCount; i++) {
+		free(dirQueue[i]);
+	}
+
 	return;
 }
 
