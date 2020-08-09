@@ -11,13 +11,31 @@ bool flags[3] = {false}; // -i, -l, -R
 
 
 int main (int argc, char *argv[]) {
+	flags[0],flags[1],flags[2] = false; // -i, -l, -R
+
+
+	testParseOption();
+	testFlags();
+	
 	processArgs(argc, argv);
 
 
 	return 0;
 }
 
+void testParseOption(){
+	char test[20] = "";
+	printf("Enter a word: ");
 
+    scanf("%s", test);  
+	parseOption(&test[0]);
+	
+}
+void testFlags(){
+	printf("-i flag: %d\n",flags[0]);
+	printf("-l flag: %d\n",flags[1]);
+	printf("-R flag: %d\n",flags[2]);
+}
 
 void processArgs(int argc, char *argv[]) {
 
@@ -37,10 +55,27 @@ void processArgs(int argc, char *argv[]) {
 }
 
 void parseOption(char* option) {
-	printf("TestText\n");
-	printf("%s\n",option);
+
 	for (int i = 0; i <strlen(option); i++){
-		printf("%c\n", option[i]);
+
+		switch (option[i]){
+			case 'i':{
+				flags[0] = true;
+				printf("DEBUG: Changed Flag -i to true. \n");
+				break;
+			} 
+			case 'l':{
+				flags[1] = true;
+				printf("DEBUG :Changed Flag -l to true. \n");
+				break;
+			} 
+			case 'R':{
+				flags[2] = true;
+				printf("DEBUG: Changed Flag -R to true. \n");
+				break;
+			} 
+		}
+		
 	}
 }
 
