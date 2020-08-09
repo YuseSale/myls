@@ -44,6 +44,9 @@ void processArgs(int argc, char *argv[]) {
 		if (argv[i][0] == '-') {
 			parseOption(argv[i]);
 		} else {
+			if (flags[2]) {
+				printf("%s:\n", argv[i]);
+			}
 			readDirectory(argv[i]);
 		}
 	}
@@ -103,28 +106,27 @@ void readDirectory (char* dir) {
 			entityQueueMax = entityQueueMax * 2;
 			entityQueue = realloc(entityQueue, entityQueueMax*8);
 		}
-
-		entityQueue[entityQueueCount] = pDirent;
-		entityQueueCount++;
+		if (pDirent->d_name[0] != '.') {
+			entityQueue[entityQueueCount] = pDirent;
+			entityQueueCount++;
+		}
 	}
-	closedir(pDir);
 
 	//sortEntityQueue(entityQueue);
 
 	for (int i = 0; i < entityQueueCount; i++) {
 
-		if (entityQueue[i]->d_name[0] == '.') {
-			continue;
-		}
 
 		// print the entity
 		printf("%s  ", entityQueue[i]->d_name);
+
 		// Create a directory string for it
 		char* goDir = malloc(255);
 
 		strcpy(goDir, dir);
 		strcat(goDir, "/");
 		strcat(goDir, entityQueue[i]->d_name);
+
 
 		// Check if the entity was an accessible directory
 		pDir = opendir(goDir);
@@ -134,15 +136,16 @@ void readDirectory (char* dir) {
 			dirQueue[dirQueueCount] = goDir;
 			dirQueueCount++;
 		}
-		closedir(pDir);
+		//closedir(pDir);
 
 	}
 
 	printf("\n\n");
-
-	for (int i = 0; i < dirQueueCount; i++) {
-		printf("%s: \n", dirQueue[i]);
-		readDirectory(dirQueue[i]);
+	if (flags[2]) {
+		for (int i = 0; i < dirQueueCount; i++) {
+			printf("%s: \n", dirQueue[i]);
+			readDirectory(dirQueue[i]);
+		}
 	}
 
 	// Free all malloced memory
