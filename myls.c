@@ -140,8 +140,15 @@ void readDirectory (char* dir) {
 
 		// print the entity
 		if (i == entityQueueCount-1) {
+			// Don't print extra \n if last entity
+			if (flags[0]) {
+				printf("%ld ", entityQueue[i]->d_ino);
+			}
 			printf("%s", entityQueue[i]->d_name);
 		} else {
+			if (flags[0]) {
+				printf("%ld ", entityQueue[i]->d_ino);
+			}
 			printf("%s\n", entityQueue[i]->d_name);
 		}
 
