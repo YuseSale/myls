@@ -126,6 +126,8 @@ void readDirectory (char* dir) {
 	struct dirent* pDirent;
 	DIR *pDir;
 }
+
+
 void testLexiSort(){
 	char table[8][MAX_WORD_LENGTH] = {"word", "that", "is","safe","for","kids","to","read"};
 
