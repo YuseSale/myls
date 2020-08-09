@@ -79,28 +79,40 @@ void parseOption(char* option) {
 	}
 }
 
-void printFiles(char* dir) {
-	// Given a directory path, print all files & folders in the directory
+// void printFiles(char* dir) {
+// 	// Given a directory path, print all files & folders in the directory
 
-	struct dirent *pDirent;
-	DIR *pDir;
+// 	struct dirent *pDirent;
+// 	DIR *pDir;
 
-	// Ensure we can open directory.
-	// If can't, it's a file, so just print it
-	pDir = opendir(dir);
-	if (pDir == NULL) {
-		printf("%s", dir);
-		return;
-	}
+// 	// Ensure we can open directory.
+// 	// If can't, it's a file, so just print it
+// 	pDir = opendir(dir);
+// 	if (pDir == NULL) {
+// 		printf("%s", dir);
+// 		return;
+// 	}
 
-	// Print all files in the directory
-	// If subdirectories found, recursively print em
-	while((pDirent=readdir(pDir))!=NULL) {
-		printf("%s  ", pDirent->d_name);
-	}
-	printf("\n");
-	// print file index (iNode number)
-	//printf("%ld ", pDirent->d_ino);
+// 	// Print all files in the directory
+// 	// If subdirectories found, recursively print em
+// 	while((pDirent=readdir(pDir))!=NULL) {
+// 		printf("%s  ", pDirent->d_name);
+// 	}
+// 	printf("\n");
+// 	// print file index (iNode number)
+// 	//printf("%ld ", pDirent->d_ino);
 
-	closedir (pDir);
-}
+// 	closedir (pDir);
+// }
+
+//readDirectory () 					//given a path to a directory. Put all entities in entityQueue
+									//sort EntityQueue based on entity->d_name in lex.order
+									//iterate through.
+										//if entity is a file, print its name
+										//if directory, print its name, put it into dirQueue
+
+									//iterate through dirQueue by calling readDirectory() on each.
+
+//parseEntity(char* thingName)  		//given an entity's fileName, 
+										//if that entity is a file, print its name
+										//if that entity is a directory, print its name and put it in dirQueue
