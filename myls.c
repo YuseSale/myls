@@ -74,32 +74,6 @@ void parseOption(char* option) {
 	}
 }
 
-// void printFiles(char* dir) {
-// 	// Given a directory path, print all files & folders in the directory
-
-// 	struct dirent *pDirent;
-// 	DIR *pDir;
-
-// 	// Ensure we can open directory.
-// 	// If can't, it's a file, so just print it
-// 	pDir = opendir(dir);
-// 	if (pDir == NULL) {
-// 		printf("%s", dir);
-// 		return;
-// 	}
-
-// 	// Print all files in the directory
-// 	// If subdirectories found, recursively print em
-// 	while((pDirent=readdir(pDir))!=NULL) {
-// 		printf("%s  ", pDirent->d_name);
-// 	}
-// 	printf("\n");
-// 	// print file index (iNode number)
-// 	//printf("%ld ", pDirent->d_ino);
-
-// 	closedir (pDir);
-// }
-
 void readDirectory (char* dir) {
 
 	int entityQueueMax = 10;
@@ -126,19 +100,24 @@ void readDirectory (char* dir) {
 			//TODO: remalloc bigger array
 		}
 
-		if (pDirent->d_name[0] != '.') {
-			entityQueue[entityQueueCount] = pDirent;
-			entityQueueCount++;
-		}
+		entityQueue[entityQueueCount] = pDirent;
+		entityQueueCount++;
 	}
+	closedir(pDir);
 
 	//sortEntityQueue(entityQueue);
 
 	for (int i = 0; i < entityQueueCount; i++) {
+
+		if (entityQueue[i]->d_name[0] == '.') {
+			continue;
+		}
+
 		// print the entity
 		printf("%s  ", entityQueue[i]->d_name);
 		// Create a directory string for it
 		char* goDir = malloc(255);
+
 		strcpy(goDir, dir);
 		strcat(goDir, "/");
 		strcat(goDir, entityQueue[i]->d_name);
@@ -151,6 +130,7 @@ void readDirectory (char* dir) {
 			dirQueue[dirQueueCount] = goDir;
 			dirQueueCount++;
 		}
+		closedir(pDir);
 	}
 	for (int i = 0; i < dirQueueCount; i++) {
 		readDirectory(dirQueue[i]);
