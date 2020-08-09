@@ -140,8 +140,15 @@ void readDirectory (char* dir) {
 
 
 		// print the entity
-		printf("%s  ", entityQueue[i]->d_name);
-
+		if (flags[1]) {
+			if (i == entityQueueCount-1) {
+				printf("%s", entityQueue[i]->d_name);
+			} else {
+				printf("%s\n", entityQueue[i]->d_name);
+			}
+		} else {
+			printf("%s  ", entityQueue[i]->d_name);
+		}
 		// Create a directory string for it
 		char* goDir = malloc(255);
 
