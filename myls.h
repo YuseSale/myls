@@ -5,7 +5,7 @@ void processArgs(int argc, char *argv[]) ;
 
 void parseOption(char* option) ;
 
-void printFiles(char* dir);
+void readDirectory(char* dir);
 
 void testParseOption();
 
