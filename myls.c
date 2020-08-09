@@ -80,17 +80,17 @@ void parseOption(char* option) {
 		switch (option[i]){
 			case 'i':{
 				flags[0] = true;
-				printf("DEBUG: Changed Flag -i to true. \n");
+				//printf("DEBUG: Changed Flag -i to true. \n");
 				break;
 			}
 			case 'l':{
 				flags[1] = true;
-				printf("DEBUG :Changed Flag -l to true. \n");
+				//printf("DEBUG :Changed Flag -l to true. \n");
 				break;
 			}
 			case 'R':{
 				flags[2] = true;
-				printf("DEBUG: Changed Flag -R to true. \n");
+				//printf("DEBUG: Changed Flag -R to true. \n");
 				break;
 			}
 		}
@@ -123,7 +123,6 @@ void readDirectory (char* dir) {
 
 		// Check if entityQueue is full
 		if (entityQueueCount == entityQueueMax) {
-			//TODO: remalloc bigger array
 			entityQueueMax = entityQueueMax * 2;
 			entityQueue = realloc(entityQueue, entityQueueMax*8);
 		}
@@ -140,15 +139,12 @@ void readDirectory (char* dir) {
 
 
 		// print the entity
-		if (flags[1]) {
-			if (i == entityQueueCount-1) {
-				printf("%s", entityQueue[i]->d_name);
-			} else {
-				printf("%s\n", entityQueue[i]->d_name);
-			}
+		if (i == entityQueueCount-1) {
+			printf("%s", entityQueue[i]->d_name);
 		} else {
-			printf("%s  ", entityQueue[i]->d_name);
+			printf("%s\n", entityQueue[i]->d_name);
 		}
+
 		// Create a directory string for it
 		char* goDir = malloc(255);
 
