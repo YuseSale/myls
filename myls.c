@@ -88,10 +88,10 @@ void processArgs(int argc, char *argv[]) {
 				entityQueueMax = entityQueueMax * 2;
 				entityQueue = realloc(entityQueue, entityQueueMax*8);
 			}
-			if (argv[i][0] != '.') {
-					entityQueue[entityQueueCount] = argv[i];
-					entityQueueCount++;
-				}
+
+				entityQueue[entityQueueCount] = argv[i];
+				entityQueueCount++;
+				
 		}
 	}
 

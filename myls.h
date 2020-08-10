@@ -18,7 +18,7 @@ bool isLower(char* first, char* second);
 void LexiSort(char* table[],int numOfEntries);
 void printEntity(struct dirent* entity, char* fullDir, int* max_size_array);
 // void LexiSort(char table[][MAX_WORD_LENGTH],int numOfEntries);
-
+char* parseDate(char* date);
 
 void readEntity (char* entityPath, int entityQueueCount);
 void readFile(char* entityPath);
