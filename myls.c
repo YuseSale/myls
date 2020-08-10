@@ -79,7 +79,6 @@ void processArgs(int argc, char *argv[]) {
 			}else{					//treat the argument as an option.
 
 				if (!parseOption(argv[i])){
-
 					return;					//if an invalid option was provided, stop the program.
 				}
 			}
@@ -104,16 +103,18 @@ void processArgs(int argc, char *argv[]) {
 	}
 
 	if (noEntry) {					//no entities were provided. This may have because the used simply called "myls", or passed only options. "call myls on current directory"
-
+		
 		printf("%s: \n", ".");
+		free(entityQueue);
 		readDirectory(".");
+
 		return;
 	}else{
 
 		// LexiSort(entityQueue,entityQueueCount);
-
 		for (int i = 0; i < entityQueueCount; i++) {
 			readEntity(entityQueue[i],entityQueueCount);
+			free(entityQueue);
 		}
 	}
 
@@ -165,7 +166,7 @@ void readEntity (char* entityPath, int entityQueueCount) {
 		}
 		readDirectory(entityPath);
 	}
-
+	closedir(pDir);
 }
 
 void readDirectory(char* entityPath){
@@ -179,9 +180,12 @@ void readDirectory(char* entityPath){
 
 
 	char* dirQueue[entityQueueMax];
-	int dirQueueCount = 0;
 
+	int dirQueueCount = 0;
+	// printf("Test2\n");
 	pDir = opendir(entityPath);
+	// printf("DEBUG: EntityPath: %s\n",entityPath);
+
 	while ((pDirent = readdir(pDir)) != NULL) {
 		// Check if entityQueue is full
 		if (entityQueueCount == entityQueueMax) {
@@ -193,44 +197,51 @@ void readDirectory(char* entityPath){
 			entityQueueCount++;
 		}
 	}
+	
+	closedir(pDir);
 
 	sortEntityQueue(entityQueue,entityQueueCount);
+
 	int max_size_array[] = {0,0,0,0};
 	if (flags[1]){
 		max_size_length(&max_size_array[0], entityQueue, entityQueueCount, entityPath);
 	}
-	
-	for (int i = 0; i < entityQueueCount; i++) {
 
+	
+
+	for (int i = 0; i < entityQueueCount; i++) {
 		// Create string for full file path
 		char* fullDir = malloc(255);
-
 		strcpy(fullDir, entityPath);
 		strcat(fullDir, "/");
 		strcat(fullDir, entityQueue[i]->d_name);
-
 		// print the entity
 		//TODO: Call print function (entityQueue[i], fullDir);
-		printEntity(entityQueue[i], fullDir,&max_size_array[0]);
-
+		
+		printEntity(entityQueue[i], fullDir, &max_size_array[0]);
+		
 		if (flags[2]){
-
-
-
 			// Check if the entity was an accessible directory
 			pDir = opendir(fullDir);
-
 			if (pDir != NULL) {
+
 				// This is an accessable directory, enqueue it
 				dirQueue[dirQueueCount] = fullDir;
 				dirQueueCount++;
+
+			}else{
+				// free(fullDir);
 			}
+			
+			closedir(pDir);
 		}
 
-	}
 
+	}
+	
 	if (flags[2]) {	//read the dirQueue, call readDirectory on all directories in dirQueue
 		for (int i = 0; i < dirQueueCount; i++) {
+			
 			printf("\n%s:\n", dirQueue[i]);
 			readDirectory(dirQueue[i]);
 		}
@@ -241,7 +252,7 @@ void readDirectory(char* entityPath){
 	for (int i = 0; i < dirQueueCount; i++) {
 		free(dirQueue[i]);
 	}
-
+	
 	return;
 }
 //given an entityQueue, return the max size of each long formatted section in characters
@@ -406,8 +417,9 @@ void printEntity(struct dirent* entity, char* fullDir, int* max_size_array) {
         str[strlen(str)-1] = 0;
 		char* newDate = parseDate(str);
 		printf("%s ", newDate);
-		//free(str);
+
 		//printf("%ld ", entityStat.st_mtime);
+		free(newDate);
 	}
 
 	printf("%s\n", entity->d_name);
@@ -462,17 +474,17 @@ void LexiSort(char* table[],int numOfEntries){
 }
 //tests if 'first' is lexicographically smaller than 'second'
 bool isLower(char* first, char* second){
-	for (int i = 0; i < strlen(first) || i <strlen(second); i++){
+	for (int i = 0; (i < strlen(first) || i <strlen(second)); i++){
 		if (tolower(first[i])<tolower(second[i])){
 			return true;
 		}
-		else if (tolower(first[i])>tolower(second[i])){
+		if (tolower(first[i])>tolower(second[i])){
 			return false;
 		}
 		if (i == strlen(second)){
 			return false;
 		}
-		else if (i == strlen(first)){
+		if (i == strlen(first)){
 			return true;
 		}
 	}
@@ -480,20 +492,23 @@ bool isLower(char* first, char* second){
 
 
 void sortEntityQueue(struct dirent** entityQueue,int numOfEntries) {
-	char lowest[MAX_WORD_LENGTH] = "";
+	char* lowestP;
 	int lowestIndex;
 	for (int i = 0; i<numOfEntries;i++){
-		strcpy(lowest,entityQueue[i]->d_name);
+		lowestP = entityQueue[i]->d_name;
 		lowestIndex=i;
 
+		
 		for (int j = i; j<numOfEntries; j++){
-			if (isLower(entityQueue[j]->d_name ,lowest)){
 
-				strcpy(lowest, entityQueue[j]->d_name );
+			if (isLower(entityQueue[j]->d_name ,lowestP)){
+
+				lowestP = entityQueue[j]->d_name;
 				lowestIndex=j;
 			}
+			
 		}
-
+		
 		struct dirent* lowestEntity = entityQueue[lowestIndex];
 
 
@@ -519,6 +534,5 @@ char* parseDate(char* date) {
 	// Copy time
 	memcpy(&newDate[12], &date[11], 5);
 	newDate[17] = '\0';
-
 	return newDate;
 }
