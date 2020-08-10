@@ -214,9 +214,6 @@ void readDirectory(char* entityPath){
 		}
 
 	}
-	if (entityQueueCount != 0){
-		printf("\n"); //newline after everything is done printing.
-	}
 
 	if (flags[2]) {	//read the dirQueue, call readDirectory on all directories in dirQueue
 		for (int i = 0; i < dirQueueCount; i++) {
