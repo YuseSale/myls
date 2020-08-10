@@ -393,8 +393,9 @@ void printEntity(struct dirent* entity, char* fullDir, int* max_size_array) {
 		timeinfo = localtime(&rawtime);
         char* str = asctime(timeinfo);
         str[strlen(str)-1] = 0;
-		printf("%s ", str);
-
+		char* newDate = parseDate(str);
+		printf("%s ", newDate);
+		//free(str);
 		//printf("%ld ", entityStat.st_mtime);
 	}
 
@@ -490,4 +491,23 @@ void sortEntityQueue(struct dirent** entityQueue,int numOfEntries) {
 	}
 
 
+}
+
+char* parseDate(char* date) {
+    char* newDate = malloc(18);
+
+	// Copy month
+	memcpy(&newDate[0], &date[4], 3);
+	newDate[3] = ' ';
+	// Copy date
+	memcpy(&newDate[4], &date[8], 2);
+	newDate[6] = ' ';
+	// Copy year
+	memcpy(&newDate[7], &date[20], 4);
+	newDate[11] = ' ';
+	// Copy time
+	memcpy(&newDate[12], &date[11], 5);
+	newDate[17] = '\0';
+
+	return newDate;
 }
