@@ -16,6 +16,7 @@ void sortEntityQueue(struct dirent** entityQueue,int numOfEntries);
 void testIsLower();
 bool isLower(char* first, char* second);
 void LexiSort(char* table[],int numOfEntries);
+void printEntity(struct dirent*, char * fullDir);
 // void LexiSort(char table[][MAX_WORD_LENGTH],int numOfEntries);
 
 
