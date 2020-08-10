@@ -5,7 +5,7 @@ void processArgs(int argc, char *argv[]) ;
 
 void parseOption(char* option) ;
 
-void readDirectory(char* dir);
+void readDirectory(char* entityPath);
 
 void testParseOption();
 
@@ -15,8 +15,12 @@ void testLexiSort();
 void sortEntityQueue(struct dirent** entityQueue,int numOfEntries);
 void testIsLower();
 bool isLower(char* first, char* second);
-void LexiSort(char table[][MAX_WORD_LENGTH],int numOfEntries);
+void LexiSort(char* table[],int numOfEntries);
+// void LexiSort(char table[][MAX_WORD_LENGTH],int numOfEntries);
 
+
+void readEntity (char* entityPath, int entityQueueCount);
+void readFile(char* entityPath);
 #endif
 
 
