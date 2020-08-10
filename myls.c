@@ -10,6 +10,7 @@
 #include <sys/types.h>
 #include <grp.h>
 #include <pwd.h>
+#include <time.h>
 
 // Citation: https://stackoverflow.com/questions/3554120/open-directory-using-c
 bool flags[3] = {false}; // -i, -l, -R
@@ -120,17 +121,17 @@ void parseOption(char* option) {
 		switch (option[i]){
 			case 'i':{
 				flags[0] = true;
-				printf("DEBUG: Changed Flag -i to true. \n");
+				//printf("DEBUG: Changed Flag -i to true. \n");
 				break;
 			}
 			case 'l':{
 				flags[1] = true;
-				printf("DEBUG :Changed Flag -l to true. \n");
+				//printf("DEBUG :Changed Flag -l to true. \n");
 				break;
 			}
 			case 'R':{
 				flags[2] = true;
-				printf("DEBUG: Changed Flag -R to true. \n");
+				//printf("DEBUG: Changed Flag -R to true. \n");
 				break;
 			}
 		}
@@ -294,7 +295,7 @@ void printEntity(struct dirent* entity, char* fullDir) {
 		} else {
 			printf("-");
 		}
-
+        printf(" ");
 		// Print the number of hard links
 		printf("%ld ", entityStat.st_nlink);
 
@@ -310,6 +311,13 @@ void printEntity(struct dirent* entity, char* fullDir) {
 		printf("%ld ", entityStat.st_size);
 
 		// Print the date & time file was last modified
+		time_t rawtime = entityStat.st_mtime;
+		struct tm* timeinfo;
+		timeinfo = localtime(&rawtime);
+        char* str = asctime(timeinfo);
+        str[strlen(str)-1] = 0;
+		printf("%s ", str);
+
 		//printf("%ld ", entityStat.st_mtime);
 	}
 
