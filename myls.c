@@ -62,7 +62,10 @@ void processArgs(int argc, char *argv[]) {
 
 	for (int i = 1; i < argc; i++) {
 		if (argv[i][0] == '-') {	//if an argument begins with '-'
-			if (!noEntry){			//an option was passed after an entity. treat it as an entity
+			
+			if ((!noEntry) || (strlen(argv[i]) == 1)){			//an option was passed after an entity, or the option is just '-'. treat it as an entity
+				
+				noEntry = false;
 				printf("DEBUG: %s treated as a file\n",argv[i]);
 				if (entityQueueCount == entityQueueMax) {
 				entityQueueMax = entityQueueMax * 2;
@@ -74,10 +77,15 @@ void processArgs(int argc, char *argv[]) {
 					entityQueueCount++;
 				}
 			}else{					//treat the argument as an option.
-				parseOption(argv[i]);
+
+				if (!parseOption(argv[i])){
+
+					return;					//if an invalid option was provided, stop the program.
+				}
 			}
 
 		} else {
+
 			noEntry = false;		//a non-option argument was provided. Treat it as an entity
 			// if (flags[2]) {
 			// 	printf("%s:\n", argv[i]);
@@ -96,6 +104,7 @@ void processArgs(int argc, char *argv[]) {
 	}
 
 	if (noEntry) {					//no entities were provided. This may have because the used simply called "myls", or passed only options. "call myls on current directory"
+
 		printf("%s: \n", ".");
 		readDirectory(".");
 		return;
@@ -110,9 +119,9 @@ void processArgs(int argc, char *argv[]) {
 
 }
 
-void parseOption(char* option) {
+bool parseOption(char* option) {
 
-	for (int i = 0; i <strlen(option); i++){
+	for (int i = 1; i <strlen(option); i++){
 
 		switch (option[i]){
 			case 'i':{
@@ -130,8 +139,13 @@ void parseOption(char* option) {
 				//printf("DEBUG: Changed Flag -R to true. \n");
 				break;
 			}
+			default: {
+				printf("myls: invalid option -- '%c'\n",option[i]);
+				return false;
+			}
 		}
 	}
+	return true;
 }
 
 //checks if an entity is a file or a directory.
@@ -146,7 +160,7 @@ void readEntity (char* entityPath, int entityQueueCount) {
 	if (pDir == NULL) {
 		readFile(entityPath);
 	} else{
-		if ((entityQueueCount != 1) && (!flags[2])){			//prints the name of the directory, unless only one directory is going to be listed.
+		if ((entityQueueCount != 1) || (flags[2])){			//prints the name of the starting directory, unless only one directory is going to be listed.
 			printf("%s: \n", entityPath);
 		}
 		readDirectory(entityPath);

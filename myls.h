@@ -3,7 +3,7 @@
 #define MAX_WORD_LENGTH 40
 void processArgs(int argc, char *argv[]) ;
 
-void parseOption(char* option) ;
+bool parseOption(char* option) ;
 
 void readDirectory(char* entityPath);
 
