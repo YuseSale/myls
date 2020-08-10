@@ -7,7 +7,7 @@
 #include "myls.h"
 #include <ctype.h>
 #include <unistd.h>
-// Citation: https://stackoverflow.com/questions/3554120/open-directory-using-c
+// Some Code Adapted from: https://stackoverflow.com/questions/3554120/open-directory-using-c
 bool flags[3] = {false}; // -i, -l, -R
 
 
@@ -96,13 +96,10 @@ void processArgs(int argc, char *argv[]) {
 		readDirectory(".");
 		return;
 	}else{
-		for (int i = 0; i<entityQueueCount;i++){
-		}
-		LexiSort(entityQueue,entityQueueCount);
-		for (int i = 0; i<entityQueueCount;i++){
-		}
-		for (int i = 0; i < entityQueueCount; i++) {
 
+		// LexiSort(entityQueue,entityQueueCount);
+
+		for (int i = 0; i < entityQueueCount; i++) {
 			readEntity(entityQueue[i],entityQueueCount);
 		}
 	}
@@ -246,11 +243,10 @@ void readFile(char* entityPath){
 
 	if (access(entityPath, F_OK) == -1){
 		printf("myls: cannot access file '%s': no such file or directory\n", entityPath);
-		 
 		return;
 	}
 	else {
-		//Error Code Stuff
+
 		printf("%s\n", entityPath);
 		return;
 	}
