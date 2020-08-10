@@ -368,7 +368,7 @@ void printEntity(struct dirent* entity, char* fullDir, int* max_size_array) {
 			printf("-");
 		}
         printf(" ");
-		
+
 
 		// Print the number of hard links
 
@@ -421,9 +421,19 @@ void printEntity(struct dirent* entity, char* fullDir, int* max_size_array) {
 		//printf("%ld ", entityStat.st_mtime);
 		free(newDate);
 	}
-
-	printf("%s\n", entity->d_name);
-
+	bool hasSpecialChar = false;
+	char specialChars[] = " !$^&,";
+	for (int i = 0; i < 6; i++) {
+		if (strchr(entity->d_name, specialChars[i]) != NULL) {
+			hasSpecialChar = true;
+			break;
+		}
+	}
+	if (hasSpecialChar) {
+		printf("'%s'\n", entity->d_name);
+	} else {
+		printf("%s\n", entity->d_name);
+	}
 
 }
 
