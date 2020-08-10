@@ -7,6 +7,10 @@
 #include "myls.h"
 #include <ctype.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <grp.h>
+#include <pwd.h>
+#include <time.h>
 // Some Code Adapted from: https://stackoverflow.com/questions/3554120/open-directory-using-c
 bool flags[3] = {false}; // -i, -l, -R
 
@@ -65,14 +69,14 @@ void processArgs(int argc, char *argv[]) {
 				entityQueue = realloc(entityQueue, entityQueueMax*8);
 				}
 				if (argv[i][0] != '.') {
-					
+
 					entityQueue[entityQueueCount] = argv[i];
 					entityQueueCount++;
 				}
 			}else{					//treat the argument as an option.
 				parseOption(argv[i]);
 			}
-			
+
 		} else {
 			noEntry = false;		//a non-option argument was provided. Treat it as an entity
 			// if (flags[2]) {
@@ -113,17 +117,17 @@ void parseOption(char* option) {
 		switch (option[i]){
 			case 'i':{
 				flags[0] = true;
-				printf("DEBUG: Changed Flag -i to true. \n");
+				//printf("DEBUG: Changed Flag -i to true. \n");
 				break;
 			}
 			case 'l':{
 				flags[1] = true;
-				printf("DEBUG :Changed Flag -l to true. \n");
+				//printf("DEBUG :Changed Flag -l to true. \n");
 				break;
 			}
 			case 'R':{
 				flags[2] = true;
-				printf("DEBUG: Changed Flag -R to true. \n");
+				//printf("DEBUG: Changed Flag -R to true. \n");
 				break;
 			}
 		}
@@ -141,25 +145,24 @@ void readEntity (char* entityPath, int entityQueueCount) {
 	pDir = opendir(entityPath);
 	if (pDir == NULL) {
 		readFile(entityPath);
-	}
-	else{
+	} else{
 		if ((entityQueueCount != 1) && (!flags[2])){			//prints the name of the directory, unless only one directory is going to be listed.
 			printf("%s: \n", entityPath);
 		}
 		readDirectory(entityPath);
 	}
-	
 
 }
 
 void readDirectory(char* entityPath){
-	
+
 	int entityQueueMax = 10;
 	//struct dirent* entityQueue[entityQueueMax];
 	struct dirent** entityQueue = malloc(entityQueueMax*8);
 	int entityQueueCount = 0;
 	struct dirent* pDirent;
 	DIR *pDir;
+
 
 	char* dirQueue[entityQueueMax];
 	int dirQueueCount = 0;
@@ -178,42 +181,38 @@ void readDirectory(char* entityPath){
 	}
 
 	sortEntityQueue(entityQueue,entityQueueCount);
-
+	int max_size_array[] = {0,0,0,0};
+	if (flags[1]){
+		max_size_length(&max_size_array[0], entityQueue, entityQueueCount, entityPath);
+	}
+	
 	for (int i = 0; i < entityQueueCount; i++) {
-		// print the entity
-		if (i == entityQueueCount-1) {
-			// Don't print extra spaces if last entity
-			if (flags[0]) {
-				printf("%ld ", entityQueue[i]->d_ino);
-			}
-			printf("%s", entityQueue[i]->d_name);
-		} else {
-			if (flags[0]) {
-				printf("%ld ", entityQueue[i]->d_ino);
-			}
-			printf("%s  ", entityQueue[i]->d_name);
-		}
-		
-		if (flags[2]){
-			// Create a directory string for it
-			char* goDir = malloc(255);
 
-			strcpy(goDir, entityPath);
-			strcat(goDir, "/");
-			strcat(goDir, entityQueue[i]->d_name);
+		// Create string for full file path
+		char* fullDir = malloc(255);
+
+		strcpy(fullDir, entityPath);
+		strcat(fullDir, "/");
+		strcat(fullDir, entityQueue[i]->d_name);
+
+		// print the entity
+		//TODO: Call print function (entityQueue[i], fullDir);
+		printEntity(entityQueue[i], fullDir,&max_size_array[0]);
+
+		if (flags[2]){
+
 
 
 			// Check if the entity was an accessible directory
-			pDir = opendir(goDir);
+			pDir = opendir(fullDir);
 
 			if (pDir != NULL) {
 				// This is an accessable directory, enqueue it
-				dirQueue[dirQueueCount] = goDir;
+				dirQueue[dirQueueCount] = fullDir;
 				dirQueueCount++;
 			}
-			//closedir(pDir);
 		}
-		
+
 	}
 	if (entityQueueCount != 0){
 		printf("\n"); //newline after everything is done printing.
@@ -221,8 +220,7 @@ void readDirectory(char* entityPath){
 
 	if (flags[2]) {	//read the dirQueue, call readDirectory on all directories in dirQueue
 		for (int i = 0; i < dirQueueCount; i++) {
-			printf("\n");
-			printf("%s: \n", dirQueue[i]);
+			printf("\n%s:\n", dirQueue[i]);
 			readDirectory(dirQueue[i]);
 		}
 	}
@@ -235,18 +233,186 @@ void readDirectory(char* entityPath){
 
 	return;
 }
+//given an entityQueue, return the max size of each long formatted section in characters
+void max_size_length(int* fillerarray, struct dirent** entityQueue, int entityQueueCount, char* rootDir){
+ 
+	// fillerarray will contain the length of the longest: {# of HardLinks, fileowner, group name, fileSize}
+	for (int i = 0; i < entityQueueCount; i++){
+		
 
+		char fullDir[200];
+		strcpy(fullDir,rootDir);
+		strcat(fullDir,"/");
+		strcat(fullDir,entityQueue[i]->d_name);
+		struct stat entityStat;
+		stat(fullDir, &entityStat);
+
+		// Find length of longest # of HardLinks
+		char nLinks[50];
+		sprintf(nLinks,"%ld",entityStat.st_nlink);
+		int lenNlinks = strlen(nLinks);
+		if (lenNlinks > fillerarray[0]){
+			fillerarray[0] = lenNlinks;
+		}
+		
+		// Find length of longest file owner username 
+		struct passwd *pw = getpwuid(entityStat.st_uid);
+		char Username[100];
+		sprintf(Username,"%s",pw->pw_name);
+		int lenUsername = strlen(Username);
+		if (lenUsername > fillerarray[1]){
+			fillerarray[1] = lenUsername;
+		}
+
+		// Find length of longest file owner group name
+		pw = getpwuid(entityStat.st_gid);
+		char Groupname[100];
+		sprintf(Groupname,"%s",pw->pw_name);
+		int lenGroupname = strlen(Groupname);
+		if (lenGroupname > fillerarray[2]){
+			fillerarray[2] = lenGroupname;
+		}
+
+		// Find length of largest file size.
+		char FileSize[100];
+		sprintf(FileSize,"%ld",entityStat.st_size);
+		int lenFileSize = strlen(FileSize);
+		if (lenFileSize > fillerarray[3]){
+			fillerarray[3] = lenFileSize;
+		}
+	}
+	return;
+}
+// Given an entity, and its full path,
+//   checks flags and prints accordingly
+void printEntity(struct dirent* entity, char* fullDir, int* max_size_array) {
+	struct stat entityStat;
+
+	if (flags[0]) {
+		printf("%ld ", entity->d_ino);
+	}
+
+	if (flags[1]) {
+
+		stat(fullDir, &entityStat);
+		if (S_ISDIR(entityStat.st_mode)) {
+			printf("d");
+		} else {
+			printf("-");
+		}
+		if (entityStat.st_mode && S_IRUSR) {
+			printf("r");
+		} else {
+			printf("-");
+		}
+		if (entityStat.st_mode && S_IWUSR) {
+			printf("w");
+		} else {
+			printf("-");
+		}
+		if (entityStat.st_mode && S_IXUSR) {
+			printf("x");
+		} else {
+			printf("-");
+		}
+		if (entityStat.st_mode && S_IRGRP) {
+			printf("r");
+		} else {
+			printf("-");
+		}
+		if (entityStat.st_mode && S_IWGRP) {
+			printf("w");
+		} else {
+			printf("-");
+		}
+		if (entityStat.st_mode && S_IXGRP) {
+			printf("x");
+		} else {
+			printf("-");
+		}
+		if (entityStat.st_mode && S_IROTH) {
+			printf("r");
+		} else {
+			printf("-");
+		}
+		if (entityStat.st_mode && S_IWOTH) {
+			printf("w");
+		} else {
+			printf("-");
+		}
+		if (entityStat.st_mode && S_IXOTH) {
+			printf("x");
+		} else {
+			printf("-");
+		}
+        printf(" ");
+		
+
+		// Print the number of hard links
+
+		char hardLinkString[40] = "%";
+		char hardLinkNum[40];
+		sprintf(hardLinkNum,"%i",max_size_array[0]);
+		strcat(hardLinkString,hardLinkNum);
+		strcat(hardLinkString,"ld ");
+		printf(hardLinkString, entityStat.st_nlink);
+
+		// Print user-name of file owner
+		struct passwd *pw = getpwuid(entityStat.st_uid);
+
+		char usernameString[40] = "%";
+		char usernameNum[40];
+		sprintf(usernameNum,"%i",max_size_array[1]);
+		strcat(usernameString,usernameNum);
+		strcat(usernameString,"s ");
+		printf(usernameString, pw->pw_name);
+
+
+		// Print group name of the file owner
+		pw = getpwuid(entityStat.st_gid);
+
+		char groupnameString[40] = "%";
+		char groupnameNum[40];
+		sprintf(groupnameNum,"%i",max_size_array[2]);
+		strcat(groupnameString,groupnameNum);
+		strcat(groupnameString,"s ");
+		printf(groupnameString, pw->pw_name);
+		
+		
+		//Print the size of the file (bytes)
+		char byteSizeString[40] = "%";
+		char byteSizeNum[40];
+		sprintf(byteSizeNum,"%i",max_size_array[3]);
+		strcat(byteSizeString,byteSizeNum);
+		strcat(byteSizeString,"li ");
+		printf(byteSizeString, entityStat.st_size);
+
+		// Print the date & time file was last modified
+		time_t rawtime = entityStat.st_mtime;
+		struct tm* timeinfo;
+		timeinfo = localtime(&rawtime);
+        char* str = asctime(timeinfo);
+        str[strlen(str)-1] = 0;
+		printf("%s ", str);
+
+		//printf("%ld ", entityStat.st_mtime);
+	}
+
+	printf("%s\n", entity->d_name);
+
+
+}
 
 //given the path to a File, check if that file actually exists
 //if the file exists: print that file's name;
 void readFile(char* entityPath){
 
 	if (access(entityPath, F_OK) == -1){
+		//Error Code Stuff
 		printf("myls: cannot access file '%s': no such file or directory\n", entityPath);
-		return;
-	}
-	else {
 
+		return;
+	} else {
 		printf("%s\n", entityPath);
 		return;
 	}
