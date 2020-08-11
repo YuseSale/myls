@@ -88,29 +88,33 @@ void processArgs(int argc, char *argv[])
 	{ //Lexicographically sort all elements, then read them.
 
 		LexiSort(entityQueue, entityQueueCount);
-
 		//for the initial Parse args, the files should all be processed before the directories.
 
 		//only read an entity if its a file.
 		DIR *pDir;
+		bool filesRead = false;
 		for (int i = 0; i < entityQueueCount; i++)
 		{
 			pDir = opendir(entityQueue[i]);
 			if (pDir == NULL)
 			{
 				readFile(entityQueue[i]);
+				filesRead = true;
 			}
 			closedir(pDir);
 		}
 		
+
 		//only read a file if its a directory.
+		bool firstDir = false;
 		for (int i = 0; i < entityQueueCount; i++)
 		{
-			bool firstDir = false;
+			
 			pDir = opendir(entityQueue[i]);
 			if (pDir != NULL)
 			{
-				if (firstDir){
+				if (!firstDir && filesRead){printf("\n");}	//print a new line to seperate the first directory from the last file
+				if (firstDir && filesRead){ 
 					printf("\n");			//print a newLine before each directory to seperate it from the directory before it. Exception for the first
 				}	else{
 					firstDir = true;
