@@ -79,6 +79,7 @@ void processArgs(int argc, char *argv[]) {
 			}else{					//treat the argument as an option.
 
 				if (!parseOption(argv[i])){
+					free(entityQueue);
 					return;					//if an invalid option was provided, stop the program.
 				}
 			}
@@ -95,7 +96,6 @@ void processArgs(int argc, char *argv[]) {
 				entityQueueMax = entityQueueMax * 2;
 				entityQueue = realloc(entityQueue, entityQueueMax*8);
 			}
-
 				entityQueue[entityQueueCount] = argv[i];
 				entityQueueCount++;
 				
@@ -103,19 +103,17 @@ void processArgs(int argc, char *argv[]) {
 	}
 
 	if (noEntry) {					//no entities were provided. This may have because the used simply called "myls", or passed only options. "call myls on current directory"
-		
 		printf("%s: \n", ".");
 		free(entityQueue);
 		readDirectory(".");
-
 		return;
 	}else{
 
 		// LexiSort(entityQueue,entityQueueCount);
 		for (int i = 0; i < entityQueueCount; i++) {
 			readEntity(entityQueue[i],entityQueueCount);
-			free(entityQueue);
 		}
+		free(entityQueue);
 	}
 
 }
@@ -153,7 +151,6 @@ bool parseOption(char* option) {
 //does the appropriate action.
 //returns false if readEntity attempts to read a file/directory that doesnt exist.
 void readEntity (char* entityPath, int entityQueueCount) {
-
 	DIR *pDir;
 
 	// Check if dir itself is an accessable directory
@@ -177,9 +174,10 @@ void readDirectory(char* entityPath){
 	int entityQueueCount = 0;
 	struct dirent* pDirent;
 	DIR *pDir;
+	DIR *pDir2;
 
 
-	char* dirQueue[entityQueueMax];
+	char dirQueue[entityQueueMax][MAX_WORD_LENGTH];
 
 	int dirQueueCount = 0;
 	// printf("Test2\n");
@@ -195,23 +193,29 @@ void readDirectory(char* entityPath){
 		if (pDirent->d_name[0] != '.') {
 			entityQueue[entityQueueCount] = pDirent;
 			entityQueueCount++;
+
 		}
 	}
 	
-	closedir(pDir);
+	
 
 	sortEntityQueue(entityQueue,entityQueueCount);
 
+	
+	
 	int max_size_array[] = {0,0,0,0};
+
+
+
 	if (flags[1]){
 		max_size_length(&max_size_array[0], entityQueue, entityQueueCount, entityPath);
 	}
 
-	
 
 	for (int i = 0; i < entityQueueCount; i++) {
 		// Create string for full file path
-		char* fullDir = malloc(255);
+		char fullDir[MAX_WORD_LENGTH] = "";
+
 		strcpy(fullDir, entityPath);
 		strcat(fullDir, "/");
 		strcat(fullDir, entityQueue[i]->d_name);
@@ -222,53 +226,61 @@ void readDirectory(char* entityPath){
 		
 		if (flags[2]){
 			// Check if the entity was an accessible directory
-			pDir = opendir(fullDir);
-			if (pDir != NULL) {
+			pDir2 = opendir(fullDir);
+			if (pDir2 != NULL) {
 
 				// This is an accessable directory, enqueue it
-				dirQueue[dirQueueCount] = fullDir;
+				char  *dirName = malloc(255);
+				strcpy(dirName,fullDir);
+				strcpy(dirQueue[dirQueueCount], dirName);
 				dirQueueCount++;
+				free(dirName);
 
 			}else{
 				// free(fullDir);
 			}
 			
-			closedir(pDir);
+			closedir(pDir2);
 		}
 
-
+		
 	}
-	
+
 	if (flags[2]) {	//read the dirQueue, call readDirectory on all directories in dirQueue
 		for (int i = 0; i < dirQueueCount; i++) {
-			
 			printf("\n%s:\n", dirQueue[i]);
 			readDirectory(dirQueue[i]);
 		}
 	}
-
 	// Free all malloced memory
+	closedir(pDir);		//uncommenting this causes a problem with -l and big folder names
 	free(entityQueue);
-	for (int i = 0; i < dirQueueCount; i++) {
-		free(dirQueue[i]);
-	}
+	// printf("dirQueueCount: %i\n",dirQueueCount);
+	// printf("%s\n",dirQueue[0]);;
+
+
+
+	// closedir(pDir);
 	
 	return;
 }
 //given an entityQueue, return the max size of each long formatted section in characters
 void max_size_length(int* fillerarray, struct dirent** entityQueue, int entityQueueCount, char* rootDir){
- 
-	// fillerarray will contain the length of the longest: {# of HardLinks, fileowner, group name, fileSize}
-	for (int i = 0; i < entityQueueCount; i++){
-		
 
-		char fullDir[200];
+
+
+	// fillerarray will contain the length of the longest: {# of HardLinks, fileowner, group name, fileSize}
+	
+	for (int i = 0; i < entityQueueCount; i++){
+
+		char fullDir[2*MAX_WORD_LENGTH];
 		strcpy(fullDir,rootDir);
 		strcat(fullDir,"/");
 		strcat(fullDir,entityQueue[i]->d_name);
+
 		struct stat entityStat;
 		stat(fullDir, &entityStat);
-
+		
 		// Find length of longest # of HardLinks
 		char nLinks[50];
 		sprintf(nLinks,"%ld",entityStat.st_nlink);
@@ -278,6 +290,7 @@ void max_size_length(int* fillerarray, struct dirent** entityQueue, int entityQu
 		}
 		
 		// Find length of longest file owner username 
+
 		struct passwd *pw = getpwuid(entityStat.st_uid);
 		char Username[100];
 		sprintf(Username,"%s",pw->pw_name);
@@ -303,6 +316,7 @@ void max_size_length(int* fillerarray, struct dirent** entityQueue, int entityQu
 			fillerarray[3] = lenFileSize;
 		}
 	}
+
 	return;
 }
 // Given an entity, and its full path,
@@ -368,7 +382,6 @@ void printEntity(struct dirent* entity, char* fullDir, int* max_size_array) {
 			printf("-");
 		}
         printf(" ");
-		
 
 		// Print the number of hard links
 
@@ -473,21 +486,49 @@ void LexiSort(char* table[],int numOfEntries){
 
 }
 //tests if 'first' is lexicographically smaller than 'second'
-bool isLower(char* first, char* second){
-	for (int i = 0; (i < strlen(first) || i <strlen(second)); i++){
-		if (tolower(first[i])<tolower(second[i])){
-			return true;
-		}
-		if (tolower(first[i])>tolower(second[i])){
-			return false;
-		}
-		if (i == strlen(second)){
-			return false;
-		}
-		if (i == strlen(first)){
-			return true;
-		}
+
+char* stringToLower(char *lowerString, char* string){
+
+	for (int i = 0; i<strlen(string);i++){
+		lowerString[i] = tolower(string[i]);
 	}
+
+}
+
+bool isLower(char* first, char* second){
+
+	char lowerFirst[MAX_WORD_LENGTH] = "";
+	char lowerSecond[MAX_WORD_LENGTH] = "";
+
+	// printf("DEBUG: First: %s    Lower First%s\n",first,lowerFirst);
+
+	stringToLower(lowerFirst,first);
+	stringToLower(lowerSecond,second);
+	
+	if (strcmp(lowerFirst,lowerSecond) < 0){
+		// printf("%s < %s\n",lowerFirst,lowerSecond);
+		return true;
+	}
+	else{
+		// printf("%s >= %s\n",lowerFirst,lowerSecond);
+		return false;
+	}
+
+	// for (int i = 0; (i < strlen(first) || i <strlen(second)); i++){
+	// 	if (tolower(first[i])<tolower(second[i])){
+	// 		return true;
+	// 	}
+	// 	if (tolower(first[i])>tolower(second[i])){
+	// 		return false;
+	// 	}
+	// 	if (i == strlen(second)){
+	// 		return false;
+	// 	}
+	// 	if (i == strlen(first)){
+	// 		return true;
+	// 	}
+
+	// }
 }
 
 

@@ -1,6 +1,6 @@
 #ifndef HEADER_FILE
 #define HEADER_FILE
-#define MAX_WORD_LENGTH 40
+#define MAX_WORD_LENGTH 256
 void processArgs(int argc, char *argv[]) ;
 
 bool parseOption(char* option) ;
