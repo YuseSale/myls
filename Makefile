@@ -1,4 +1,4 @@
 all : myls
 
 clean :
-	rm myls *.o
+	rm myls
