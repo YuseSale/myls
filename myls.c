@@ -100,8 +100,9 @@ void processArgs(int argc, char *argv[])
 			{
 				readFile(entityQueue[i]);
 			}
+			closedir(pDir);
 		}
-
+		
 		//only read a file if its a directory.
 		for (int i = 0; i < entityQueueCount; i++)
 		{
@@ -110,7 +111,7 @@ void processArgs(int argc, char *argv[])
 			if (pDir != NULL)
 			{
 				if (firstDir){
-					printf("\n");			//print a newLine before each directory to seperate it from the directory before it. Exception for the first directory
+					printf("\n");			//print a newLine before each directory to seperate it from the directory before it. Exception for the first
 				}	else{
 					firstDir = true;
 				}
@@ -122,10 +123,12 @@ void processArgs(int argc, char *argv[])
 				}
 				
 				readDirectory(entityQueue[i]);
+				
 			}
+			closedir(pDir);
 		}
 
-		closedir(pDir);
+		// closedir(pDir);
 		free(entityQueue);
 	}
 }
@@ -525,7 +528,7 @@ void readFile(char *entityPath)
 // Lexicographically sort an array of strings
 void LexiSort(char *table[], int numOfEntries)
 {
-	char *lowest = malloc(MAX_WORD_LENGTH);
+	char *lowest =" ";
 	int lowestIndex;
 	for (int i = 0; i < numOfEntries; i++)
 	{
@@ -543,6 +546,7 @@ void LexiSort(char *table[], int numOfEntries)
 		table[i] = lowest;
 	}
 
+	return;
 }
 //given two strings, lowerString, and string. rewrite lowerString to match string, except with all alphabetical letters in lowercase
 char *stringToLower(char *lowerString, char *string)
