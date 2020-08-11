@@ -105,15 +105,22 @@ void processArgs(int argc, char *argv[])
 		//only read a file if its a directory.
 		for (int i = 0; i < entityQueueCount; i++)
 		{
-
+			bool firstDir = false;
 			pDir = opendir(entityQueue[i]);
 			if (pDir != NULL)
 			{
-				printf("\n");
+				if (firstDir){
+					printf("\n");			//print a newLine before each directory to seperate it from the directory before it. Exception for the first directory
+				}	else{
+					firstDir = true;
+				}
+
+				
 				if ((entityQueueCount != 1) || (flags[2]))
 				{
 					printf("%s: \n", entityQueue[i]); //prints the name of the starting directory, unless only one directory is going to be listed.
 				}
+				
 				readDirectory(entityQueue[i]);
 			}
 		}
@@ -122,7 +129,7 @@ void processArgs(int argc, char *argv[])
 		free(entityQueue);
 	}
 }
-
+//given an 'option' string, parse through each character and set Flags accordingly
 bool parseOption(char *option)
 {
 
@@ -182,7 +189,7 @@ void readEntity(char *entityPath, int entityQueueCount)
 	}
 	closedir(pDir);
 }
-
+//given the path to a directory, print all of its contents. Recursively print any directories found, if the -R flag is set.
 void readDirectory(char *entityPath)
 {
 
@@ -276,7 +283,7 @@ void readDirectory(char *entityPath)
 
 	return;
 }
-//given an entityQueue, return the max size of each long formatted section in characters
+//given an entityQueue, return fillerarray, with information on the entityQueue's longest: #of hardlinks, fileownername, groupname, fileSize
 void max_size_length(int *fillerarray, struct dirent **entityQueue, int entityQueueCount, char *rootDir)
 {
 
@@ -303,7 +310,6 @@ void max_size_length(int *fillerarray, struct dirent **entityQueue, int entityQu
 		}
 
 		// Find length of longest file owner username
-
 		struct passwd *pw = getpwuid(entityStat.st_uid);
 		char Username[100];
 		sprintf(Username, "%s", pw->pw_name);
@@ -336,7 +342,7 @@ void max_size_length(int *fillerarray, struct dirent **entityQueue, int entityQu
 	return;
 }
 // Given an entity, and its full path,
-// checks flags and prints accordingly
+// check print options and prints the entity accordingly
 void printEntity(struct dirent *entity, char *fullDir, int *max_size_array)
 {
 	struct stat entityStat;
@@ -433,7 +439,6 @@ void printEntity(struct dirent *entity, char *fullDir, int *max_size_array)
 		printf(" ");
 
 		// Print the number of hard links
-
 		char hardLinkString[40] = "%";
 		char hardLinkNum[40];
 		sprintf(hardLinkNum, "%i", max_size_array[0]);
@@ -443,7 +448,6 @@ void printEntity(struct dirent *entity, char *fullDir, int *max_size_array)
 
 		// Print user-name of file owner
 		struct passwd *pw = getpwuid(entityStat.st_uid);
-
 		char usernameString[40] = "%";
 		char usernameNum[40];
 		sprintf(usernameNum, "%i", max_size_array[1]);
@@ -453,7 +457,6 @@ void printEntity(struct dirent *entity, char *fullDir, int *max_size_array)
 
 		// Print group name of the file owner
 		pw = getpwuid(entityStat.st_gid);
-
 		char groupnameString[40] = "%";
 		char groupnameNum[40];
 		sprintf(groupnameNum, "%i", max_size_array[2]);
@@ -519,27 +522,13 @@ void readFile(char *entityPath)
 		return;
 	}
 }
-
-void testLexiSort()
-{
-	char *table[8] = {"word", "that", "is", "safe", "for", "kids", "to", "read"};
-	for (int i = 0; i < 8; i++)
-	{
-		printf("%i: %s\n", i, table[i]);
-	}
-	printf("Sorting....\n");
-	LexiSort(table, 8);
-}
-
+// Lexicographically sort an array of strings
 void LexiSort(char *table[], int numOfEntries)
 {
-	// void LexiSort(char table[][MAX_WORD_LENGTH],int numOfEntries){
-
 	char *lowest = malloc(MAX_WORD_LENGTH);
 	int lowestIndex;
 	for (int i = 0; i < numOfEntries; i++)
 	{
-
 		lowest = table[i];
 		lowestIndex = i;
 		for (int j = i; j < numOfEntries; j++)
@@ -550,63 +539,41 @@ void LexiSort(char *table[], int numOfEntries)
 				lowestIndex = j;
 			}
 		}
-
 		table[lowestIndex] = table[i];
 		table[i] = lowest;
 	}
 
-	// free(lowest);
 }
-//tests if 'first' is lexicographically smaller than 'second'
-
+//given two strings, lowerString, and string. rewrite lowerString to match string, except with all alphabetical letters in lowercase
 char *stringToLower(char *lowerString, char *string)
 {
-
 	for (int i = 0; i < strlen(string); i++)
 	{
 		lowerString[i] = tolower(string[i]);
 	}
 }
 
+//given two strings, return true if the first string is lexicographically smaller.
 bool isLower(char *first, char *second)
 {
 
 	char lowerFirst[MAX_WORD_LENGTH] = "";
 	char lowerSecond[MAX_WORD_LENGTH] = "";
 
-	// printf("DEBUG: First: %s    Lower First%s\n",first,lowerFirst);
-
 	stringToLower(lowerFirst, first);
 	stringToLower(lowerSecond, second);
 
 	if (strcmp(lowerFirst, lowerSecond) < 0)
 	{
-		// printf("%s < %s\n",lowerFirst,lowerSecond);
 		return true;
 	}
 	else
 	{
-		// printf("%s >= %s\n",lowerFirst,lowerSecond);
 		return false;
 	}
 
-	// for (int i = 0; (i < strlen(first) || i <strlen(second)); i++){
-	// 	if (tolower(first[i])<tolower(second[i])){
-	// 		return true;
-	// 	}
-	// 	if (tolower(first[i])>tolower(second[i])){
-	// 		return false;
-	// 	}
-	// 	if (i == strlen(second)){
-	// 		return false;
-	// 	}
-	// 	if (i == strlen(first)){
-	// 		return true;
-	// 	}
-
-	// }
 }
-
+//given a queue of dirEnts, sort them based on their names. 
 void sortEntityQueue(struct dirent **entityQueue, int numOfEntries)
 {
 	char *lowestP;
@@ -633,7 +600,7 @@ void sortEntityQueue(struct dirent **entityQueue, int numOfEntries)
 		entityQueue[i] = lowestEntity;
 	}
 }
-
+//given an asctime string, reformat the string into MMM DD YYYY hh:mm format
 char *parseDate(char *date)
 {
 	char *newDate = malloc(18);
