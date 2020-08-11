@@ -362,8 +362,18 @@ void printEntity(struct dirent *entity, char *fullDir, int *max_size_array)
 	if (flags[1])
 	{
 
-		stat(fullDir, &entityStat);
-		if (S_ISDIR(entityStat.st_mode))
+		int st = stat(fullDir, &entityStat);
+		if (st != 0)
+		{
+			perror("stat error: ");
+			return;
+		}
+
+		if (entity->d_type == DT_LNK)
+		{
+			printf("l");
+		}
+		else if (S_ISDIR(entityStat.st_mode))
 		{
 			printf("d");
 		}
@@ -371,7 +381,7 @@ void printEntity(struct dirent *entity, char *fullDir, int *max_size_array)
 		{
 			printf("-");
 		}
-		if (entityStat.st_mode && S_IRUSR)
+		if (entityStat.st_mode & S_IRUSR)
 		{
 			printf("r");
 		}
@@ -379,7 +389,7 @@ void printEntity(struct dirent *entity, char *fullDir, int *max_size_array)
 		{
 			printf("-");
 		}
-		if (entityStat.st_mode && S_IWUSR)
+		if (entityStat.st_mode & S_IWUSR)
 		{
 			printf("w");
 		}
@@ -387,7 +397,7 @@ void printEntity(struct dirent *entity, char *fullDir, int *max_size_array)
 		{
 			printf("-");
 		}
-		if (entityStat.st_mode && S_IXUSR)
+		if (entityStat.st_mode & S_IXUSR)
 		{
 			printf("x");
 		}
@@ -395,7 +405,7 @@ void printEntity(struct dirent *entity, char *fullDir, int *max_size_array)
 		{
 			printf("-");
 		}
-		if (entityStat.st_mode && S_IRGRP)
+		if (entityStat.st_mode & S_IRGRP)
 		{
 			printf("r");
 		}
@@ -403,7 +413,7 @@ void printEntity(struct dirent *entity, char *fullDir, int *max_size_array)
 		{
 			printf("-");
 		}
-		if (entityStat.st_mode && S_IWGRP)
+		if (entityStat.st_mode & S_IWGRP)
 		{
 			printf("w");
 		}
@@ -411,7 +421,7 @@ void printEntity(struct dirent *entity, char *fullDir, int *max_size_array)
 		{
 			printf("-");
 		}
-		if (entityStat.st_mode && S_IXGRP)
+		if (entityStat.st_mode & S_IXGRP)
 		{
 			printf("x");
 		}
@@ -419,7 +429,7 @@ void printEntity(struct dirent *entity, char *fullDir, int *max_size_array)
 		{
 			printf("-");
 		}
-		if (entityStat.st_mode && S_IROTH)
+		if (entityStat.st_mode & S_IROTH)
 		{
 			printf("r");
 		}
@@ -427,7 +437,7 @@ void printEntity(struct dirent *entity, char *fullDir, int *max_size_array)
 		{
 			printf("-");
 		}
-		if (entityStat.st_mode && S_IWOTH)
+		if (entityStat.st_mode & S_IWOTH)
 		{
 			printf("w");
 		}
@@ -435,7 +445,7 @@ void printEntity(struct dirent *entity, char *fullDir, int *max_size_array)
 		{
 			printf("-");
 		}
-		if (entityStat.st_mode && S_IXOTH)
+		if (entityStat.st_mode & S_IXOTH)
 		{
 			printf("x");
 		}
